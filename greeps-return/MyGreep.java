@@ -108,6 +108,6 @@ public class MyGreep extends Greep
      */
     public String getName()
     {
-        return "Your name here";  // write your name here!
+        return "Swag Kings";  // write your name here!
     }
 }
