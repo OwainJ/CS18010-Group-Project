@@ -45,7 +45,7 @@ public class MyGreep extends Greep
 {
     // Remember: you cannot extend the Greep's memory. So:
     // no additional fields (other than final fields) allowed in this class!
-    
+
     /**
      * Default constructor. Do not remove.
      */
@@ -53,13 +53,14 @@ public class MyGreep extends Greep
     {
         super(ship);
     }
-    
+
     /**
      * Do what a greep's gotta do.
      */
     public void act()
     {
         super.act();   // do not delete! leave as first statement in act().
+        checkFood();
         if (carryingTomato()) {
             if(atShip()) {
                 dropTomato();
@@ -69,12 +70,31 @@ public class MyGreep extends Greep
                 move();
             }
         }
+
+        else if(getTomatoes() != null) {            
+            TomatoPile tomatoes = getTomatoes(); 
+            if(!blockAtPile(tomatoes)) {
+                // Not blocking so lets go towards the centre of the pile
+                turnTowards(tomatoes.getX(), tomatoes.getY());
+                move();
+            }
+        }
+        else if (numberOfOpponents(false) > 3) {
+            // Can we see four or more opponents?
+            kablam();
+        }
+
         else {
             randomWalk();
-            checkFood();
+
         }
+
+        if (atWater() || moveWasBlocked()) {
+            turn(Greenfoot.getRandomNumber(300));
+            move(20);
+        }        
     }
-    
+
     /** 
      * Move forward, with a slight chance of turning randomly
      */
@@ -84,7 +104,6 @@ public class MyGreep extends Greep
         if (randomChance(3)) {
             turn((Greenfoot.getRandomNumber(3) - 1) * 100);
         }
-        
         move();
     }
 
@@ -100,6 +119,27 @@ public class MyGreep extends Greep
             // Note: this attempts to load a tomato onto *another* Greep. It won't
             // do anything if we are alone here.
         }
+    }
+
+    private boolean blockAtPile(TomatoPile tomatoes) 
+    {
+        // Are we at the centre of the pile of tomatoes?  
+        boolean atPileCentre = tomatoes != null && distanceTo(tomatoes.getX(), tomatoes.getY()) < 4;
+        if(atPileCentre && getFriend() == null ) {
+            // No friends at this pile, so we might as well block
+            block(); 
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    private int distanceTo(int x, int y)
+    {
+        int deltaX = getX() - x;
+        int deltaY = getY() - y;
+        return (int) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     }
 
     /**
